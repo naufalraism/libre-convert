@@ -42,7 +42,7 @@ export async function convertFile(
   }
 
   if (!officeReady) {
-    onNote((await isRuntimeCached()) ? 'Starting LibreOffice' : 'Downloading LibreOffice (about 50 MB, first time only)')
+    onNote((await isRuntimeCached()) ? 'Menyalakan LibreOffice' : 'Mengunduh LibreOffice (sekitar 50 MB, hanya saat pertama kali)')
   }
 
   const helper = await startOffice()
@@ -72,7 +72,7 @@ function startOffice(): Promise<ZetaHelperMain> {
 async function bootOffice(): Promise<ZetaHelperMain> {
   if (!crossOriginIsolated) {
     throw new Error(
-      'This page is not cross-origin isolated, so LibreOffice cannot run. Reload the page. If that does not help, the browser is blocking the service worker this site needs.',
+      'Halaman ini belum dalam mode cross-origin isolated, sehingga LibreOffice tidak bisa berjalan. Muat ulang halaman. Jika masih sama, browser kemungkinan memblokir service worker yang dibutuhkan situs ini (misalnya di mode privat).',
     )
   }
 
@@ -80,7 +80,7 @@ async function bootOffice(): Promise<ZetaHelperMain> {
 
   return new Promise<ZetaHelperMain>((resolve, reject) => {
     const fail = (reason: string) => {
-      const error = new Error(`${reason} Reload the page to try again.`)
+      const error = new Error(`${reason} Muat ulang halaman untuk mencoba lagi.`)
       window.removeEventListener('error', onLoadError, true)
       reject(error)
       for (const job of pending.values()) {
@@ -95,14 +95,14 @@ async function bootOffice(): Promise<ZetaHelperMain> {
     // Nothing else on the page runs while LibreOffice boots, so any uncaught error means the runtime failed
     // to load (offline, CDN down). Its errors come from a cross-origin script, so they carry no details.
     // Capturing also catches the runtime <script> tag failing to load, which doesn't bubble.
-    const onLoadError = () => fail('LibreOffice failed to load.')
+    const onLoadError = () => fail('LibreOffice gagal dimuat.')
     window.addEventListener('error', onLoadError, true)
 
     const helper = new ZetaHelperMain(new URL(officeWorkerUrl, import.meta.url).href, {
       threadJsType: 'module',
       blockPageScroll: false,
     })
-    helper.Module.onAbort = () => fail('LibreOffice stopped unexpectedly.')
+    helper.Module.onAbort = () => fail('LibreOffice berhenti secara tak terduga.')
 
     helper.start(() => {
       helper.thrPort.onmessage = ({ data }: MessageEvent<OfficeReply>) => {

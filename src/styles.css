@@ -499,3 +499,50 @@ button {
     display: none;
   }
 }
+
+.guide {
+  margin-top: 16px;
+  padding: var(--pad);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  background: var(--surface-elevated);
+}
+
+.guide h2 {
+  margin: 0 0 10px;
+  font-size: 0.9375rem;
+  font-weight: 500;
+}
+
+.guide ol {
+  margin: 0;
+  padding-left: 1.3em;
+  font-size: 0.875rem;
+  color: var(--text-muted);
+}
+
+.guide li {
+  margin: 6px 0;
+}
+
+.guide strong {
+  font-weight: 500;
+  color: var(--text-strong);
+}
+
+.guide-note {
+  margin: 12px 0 0;
+  font-size: 0.8125rem;
+  color: var(--text-dim);
+}
+
+.credit {
+  margin-top: 16px;
+  font-size: 0.75rem;
+  text-align: center;
+  color: var(--text-dim);
+}
+
+.credit a {
+  color: var(--text-muted);
+}

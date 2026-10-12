@@ -47,7 +47,7 @@ thrPort.onmessage = ({ data: job }: MessageEvent<OfficeJob>) => {
   try {
     doc = desktop.loadComponentFromURL(`file://${job.from}`, '_blank', 0, [property('Hidden', true)])
     if (!doc) {
-      throw new Error('LibreOffice could not open this file. It may be damaged or password protected.')
+      throw new Error('LibreOffice tidak bisa membuka file ini. File mungkin rusak atau diproteksi password.')
     }
 
     if (job.layout !== 'original' && (job.kind === 'writer' || job.kind === 'calc')) {
@@ -108,5 +108,5 @@ function describe(error: unknown): string {
     // Not a UNO exception.
   }
 
-  return error instanceof Error && error.message ? error.message : 'LibreOffice could not convert this file.'
+  return error instanceof Error && error.message ? error.message : 'LibreOffice tidak bisa mengonversi file ini.'
 }

@@ -104,13 +104,13 @@ async function rasterize(file: File, type: 'image/png' | 'image/jpeg'): Promise<
     // Applies EXIF orientation by default.
     bitmap = await createImageBitmap(file)
   } catch {
-    throw new Error('This browser could not decode the image.')
+    throw new Error('Browser ini tidak bisa membaca gambar tersebut.')
   }
 
   const canvas = new OffscreenCanvas(bitmap.width, bitmap.height)
   const context = canvas.getContext('2d')
   if (!context) {
-    throw new Error('Canvas rendering is unavailable in this browser.')
+    throw new Error('Browser ini tidak mendukung rendering canvas.')
   }
 
   context.drawImage(bitmap, 0, 0)

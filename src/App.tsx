@@ -44,9 +44,9 @@ const ICONS: Record<Kind, LucideIcon> = {
 }
 
 const LAYOUTS: { value: Layout; label: string; hint: string }[] = [
-  { value: 'original', label: 'Original', hint: "Keeps each file's own page size and orientation." },
-  { value: 'portrait', label: 'Portrait', hint: 'Documents and sheets re-flow; slides and images are fitted onto A4.' },
-  { value: 'landscape', label: 'Landscape', hint: 'Documents re-flow, sheets fit to page width; slides and images are fitted onto A4.' },
+  { value: 'original', label: 'Asli', hint: 'Mempertahankan ukuran dan orientasi halaman asli tiap file.' },
+  { value: 'portrait', label: 'Potret', hint: 'Dokumen dan lembar kerja disusun ulang; slide dan gambar disesuaikan ke A4.' },
+  { value: 'landscape', label: 'Lanskap', hint: 'Dokumen disusun ulang, lembar kerja disesuaikan ke lebar halaman; slide dan gambar disesuaikan ke A4.' },
 ]
 
 const LAYOUT_KEY = 'libre-convert:layout'
@@ -89,7 +89,7 @@ export default function App({ convert = convertFile, preload = preloadOffice }: 
       }
     }
 
-    setNotice(skipped.length > 0 ? `Skipped unsupported files: ${skipped.join(', ')}` : undefined)
+    setNotice(skipped.length > 0 ? `File tidak didukung dilewati: ${skipped.join(', ')}` : undefined)
     if (added.length === 0) {
       return
     }
@@ -149,18 +149,18 @@ export default function App({ convert = convertFile, preload = preloadOffice }: 
       const entries = await Promise.all(outputs.map(async (output) => new Uint8Array(await output.pdf.arrayBuffer())))
       // PDFs are already compressed, so store them as-is.
       const zip = zipSync(Object.fromEntries(names.map((name, index) => [name, entries[index]])), { level: 0 })
-      save(new Blob([zip], { type: 'application/zip' }), 'libre-convert.zip')
+      save(new Blob([zip], { type: 'application/zip' }), 'hasil-konversi.zip')
     } catch (error) {
-      setNotice(`Could not build the ZIP: ${error instanceof Error ? error.message : String(error)}`)
+      setNotice(`Gagal membuat ZIP: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
 
   async function merge() {
     try {
       const { mergePdfs } = await import('./conversion/pdf')
-      save(await mergePdfs(outputs.map((output) => output.pdf)), 'merged.pdf')
+      save(await mergePdfs(outputs.map((output) => output.pdf)), 'gabungan.pdf')
     } catch (error) {
-      setNotice(`Could not merge the PDFs: ${error instanceof Error ? error.message : String(error)}`)
+      setNotice(`Gagal menggabungkan PDF: ${error instanceof Error ? error.message : String(error)}`)
     }
   }
 
@@ -230,8 +230,8 @@ export default function App({ convert = convertFile, preload = preloadOffice }: 
   return (
     <main className="shell">
       <header className="intro">
-        <h1>Libre Convert</h1>
-        <p>Office documents and images to PDF, entirely in your browser. Files never leave your device.</p>
+        <h1>Konversi Dokumen ke PDF</h1>
+        <p>Dokumen Office dan gambar ke PDF, langsung di browser kamu. File tidak pernah keluar dari perangkatmu.</p>
       </header>
 
       <section className="card">
@@ -239,9 +239,9 @@ export default function App({ convert = convertFile, preload = preloadOffice }: 
           <span className="dropzone-badge">
             <Upload size={jobs.length > 0 ? 16 : 18} />
           </span>
-          <strong>{jobs.length > 0 ? 'Add more files' : 'Drop files here'}</strong>
+          <strong>{jobs.length > 0 ? 'Tambah file lagi' : 'Letakkan file di sini'}</strong>
           <span className="muted">
-            {jobs.length > 0 ? 'Drop, click or paste' : 'or click to choose. Pasting images works too.'}
+            {jobs.length > 0 ? 'Seret, klik, atau tempel' : 'atau klik untuk memilih. Menempel gambar juga bisa.'}
           </span>
           <input
             className="sr-only"
@@ -258,7 +258,7 @@ export default function App({ convert = convertFile, preload = preloadOffice }: 
         {jobs.length > 0 && (
           <div className="toolbar">
             <label className="field">
-              <span className="label">Page layout</span>
+              <span className="label">Tata letak halaman</span>
               <select
                 value={layout}
                 disabled={busy}
@@ -285,12 +285,12 @@ export default function App({ convert = convertFile, preload = preloadOffice }: 
             >
               {busy ? <LoaderCircle className="spin" size={16} /> : <Download size={16} />}
               {busy
-                ? `Converting ${Math.min(finished + 1, jobs.length)} of ${jobs.length}`
+                ? `Mengonversi ${Math.min(finished + 1, jobs.length)} dari ${jobs.length}`
                 : queued > 1
-                  ? `Convert ${queued} files`
+                  ? `Konversi ${queued} file`
                   : queued === 1
-                    ? 'Convert to PDF'
-                    : 'Convert all again'}
+                    ? 'Konversi ke PDF'
+                    : 'Konversi ulang semua'}
             </button>
           </div>
         )}
@@ -303,7 +303,7 @@ export default function App({ convert = convertFile, preload = preloadOffice }: 
         )}
 
         {jobs.length === 0 ? (
-          <p className="empty">Documents, spreadsheets, slides and images.</p>
+          <p className="empty">Dokumen, lembar kerja, slide, dan gambar.</p>
         ) : (
           <>
             <ul className="jobs">
@@ -331,19 +331,19 @@ export default function App({ convert = convertFile, preload = preloadOffice }: 
                       {pdf && (
                         <button type="button" className="button" onClick={() => save(pdf, pdfName(job.file.name))}>
                           <Download size={15} />
-                          <span className="button-label">Download</span>
+                          <span className="button-label">Unduh</span>
                         </button>
                       )}
                       {job.status === 'error' && (
                         <button type="button" className="button" onClick={() => retry(job.id)}>
                           <RotateCcw size={15} />
-                          <span className="button-label">Retry</span>
+                          <span className="button-label">Coba lagi</span>
                         </button>
                       )}
                       <button
                         type="button"
                         className="icon-button"
-                        aria-label={`Remove ${job.file.name}`}
+                        aria-label={`Hapus ${job.file.name}`}
                         onClick={() => commit(jobsRef.current.filter((item) => item.id !== job.id))}
                       >
                         <X size={15} />
@@ -357,22 +357,22 @@ export default function App({ convert = convertFile, preload = preloadOffice }: 
             <div className="footer">
               <span className="mono muted" aria-live="polite">
                 {finished === 0 && !busy
-                  ? `${jobs.length} ${jobs.length === 1 ? 'file' : 'files'}`
-                  : `${outputs.length} of ${jobs.length} converted${failed > 0 ? `, ${failed} failed` : ''}`}
+                  ? `${jobs.length} file`
+                  : `${outputs.length} dari ${jobs.length} selesai${failed > 0 ? `, ${failed} gagal` : ''}`}
               </span>
               <button type="button" className="link" onClick={() => commit([])}>
-                Clear
+                Kosongkan
               </button>
               <div className="footer-actions">
                 {outputs.length > 1 && (
                   <>
                     <button type="button" className="button" onClick={() => void downloadAll()}>
                       <Archive size={15} />
-                      Download all
+                      Unduh semua (ZIP)
                     </button>
                     <button type="button" className="button" onClick={() => void merge()}>
                       <Combine size={15} />
-                      Merge into one PDF
+                      Gabungkan jadi satu PDF
                     </button>
                   </>
                 )}
@@ -382,9 +382,40 @@ export default function App({ convert = convertFile, preload = preloadOffice }: 
         )}
       </section>
 
+      <section className="guide" aria-labelledby="guide-title">
+        <h2 id="guide-title">Cara memakai</h2>
+        <ol>
+          <li>Pilih file Word (.docx) atau seret ke kotak di atas. Beberapa file sekaligus juga bisa.</li>
+          <li>
+            Klik <strong>Konversi ke PDF</strong>. Saat pertama kali dipakai, mesin LibreOffice (sekitar 50 MB) diunduh
+            dulu, jadi tunggu sebentar. Setelah itu jauh lebih cepat dan bisa dipakai tanpa internet.
+          </li>
+          <li>
+            Saat muncul tulisan <strong>PDF siap</strong>, klik <strong>Unduh</strong>. File PDF tersimpan di folder
+            Unduhan (Downloads) browser kamu.
+          </li>
+          <li>
+            Punya banyak file? Pakai <strong>Unduh semua (ZIP)</strong>, atau <strong>Gabungkan jadi satu PDF</strong>.
+          </li>
+        </ol>
+        <p className="guide-note">
+          Untuk hasil yang sama persis dengan Word, biarkan tata letak halaman di <strong>Asli</strong>. Halaman akan
+          memuat ulang satu kali saat kunjungan pertama, itu normal. Font yang tidak ada di perangkat bisa diganti
+          font lain, jadi dokumen yang rumit tetap bisa sedikit bergeser.
+        </p>
+      </section>
+
+      <footer className="credit">
+        Berdasarkan{' '}
+        <a href="https://github.com/Rhgx/libre-convert" target="_blank" rel="noreferrer">
+          Libre Convert
+        </a>{' '}
+        oleh Rhgx (lisensi MIT). Mesin konversi: LibreOffice melalui ZetaOffice.
+      </footer>
+
       {dragging && (
         <div className="drop-overlay" aria-hidden="true">
-          <span>Drop to add files</span>
+          <span>Lepaskan untuk menambah file</span>
         </div>
       )}
     </main>
@@ -396,14 +427,15 @@ function statusText(job: Job, currentLayout: Layout): string {
     case 'queued':
       return ''
     case 'converting':
-      return job.note ?? 'Converting'
+      return job.note ?? 'Mengonversi'
     case 'done': {
       const size = job.pdf ? `, ${formatBytes(job.pdf.size)}` : ''
-      const made = job.layout && job.layout !== currentLayout ? ` (${job.layout})` : ''
-      return `PDF ready${size}${made}`
+      const madeLabel = LAYOUTS.find((item) => item.value === job.layout)?.label.toLowerCase()
+      const made = job.layout && job.layout !== currentLayout && madeLabel ? ` (${madeLabel})` : ''
+      return `PDF siap${size}${made}`
     }
     case 'error':
-      return job.note ?? 'Conversion failed'
+      return job.note ?? 'Konversi gagal'
   }
 }
 

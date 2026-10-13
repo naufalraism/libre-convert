@@ -1,17 +1,22 @@
 import { useEffect, useEffectEvent, useRef, useState } from 'react'
 import {
   Archive,
+  BadgeCheck,
   Combine,
   Download,
   FileSpreadsheet,
   FileText,
   ImageIcon,
   LoaderCircle,
+  Moon,
   Presentation,
   RotateCcw,
   Shapes,
+  ShieldCheck,
+  Sun,
   TriangleAlert,
   Upload,
+  WifiOff,
   X,
   type LucideIcon,
 } from 'lucide-react'
@@ -53,6 +58,30 @@ const LAYOUT_KEY = 'libre-convert:layout'
 const TITLE = document.title
 const SHORTCUT = /Mac|iPhone|iPad/.test(navigator.platform) ? 'Cmd+Enter' : 'Ctrl+Enter'
 
+type Theme = 'light' | 'dark'
+
+const THEME_KEY = 'libre-convert:theme'
+
+// index.html sets data-theme before the first paint; this is the fallback when it did not run (tests, odd setups).
+function initialTheme(): Theme {
+  const applied = document.documentElement.dataset.theme
+  if (applied === 'light' || applied === 'dark') {
+    return applied
+  }
+
+  try {
+    const stored = window.localStorage.getItem(THEME_KEY)
+    if (stored === 'light' || stored === 'dark') {
+      return stored
+    }
+  } catch {
+    // Storage is unavailable (private mode): fall back to the system setting.
+  }
+
+  const prefersDark = typeof window.matchMedia === 'function' && window.matchMedia('(prefers-color-scheme: dark)').matches
+  return prefersDark ? 'dark' : 'light'
+}
+
 let nextId = 0
 
 export default function App({ convert = convertFile, preload = preloadOffice }: AppProps) {
@@ -63,6 +92,7 @@ export default function App({ convert = convertFile, preload = preloadOffice }: 
   const [busy, setBusy] = useState(false)
   const [dragging, setDragging] = useState(false)
   const [notice, setNotice] = useState<string>()
+  const [theme, setTheme] = useState<Theme>(initialTheme)
   // The conversion loop outlives renders, so it reads and writes jobs through this ref; state mirrors it.
   const jobsRef = useRef<Job[]>([])
   const busyRef = useRef(false)
@@ -218,6 +248,21 @@ export default function App({ convert = convertFile, preload = preloadOffice }: 
   }, [])
 
 
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme
+    document.querySelector('meta[name="theme-color"]')?.setAttribute('content', theme === 'dark' ? '#171613' : '#f6f2ea')
+  }, [theme])
+
+  function toggleTheme() {
+    const next: Theme = theme === 'dark' ? 'light' : 'dark'
+    setTheme(next)
+    try {
+      window.localStorage.setItem(THEME_KEY, next)
+    } catch {
+      // Storage is unavailable (private mode): the choice simply is not remembered.
+    }
+  }
+
   const outputs = jobs.flatMap((job) => (job.pdf ? [{ name: pdfName(job.file.name), pdf: job.pdf }] : []))
   const queued = jobs.filter((job) => job.status === 'queued').length
   const failed = jobs.filter((job) => job.status === 'error').length
@@ -229,20 +274,62 @@ export default function App({ convert = convertFile, preload = preloadOffice }: 
 
   return (
     <main className="shell">
-      <header className="intro">
-        <h1>Konversi Dokumen ke PDF</h1>
-        <p>Dokumen Office dan gambar ke PDF, langsung di browser kamu. File tidak pernah keluar dari perangkatmu.</p>
+      <header className="topbar">
+        <div className="brand">
+          <span className="brand-mark" aria-hidden="true">
+            <ShieldCheck size={20} />
+          </span>
+          <span className="brand-name">Konversi PDF</span>
+        </div>
+        <button
+          type="button"
+          role="switch"
+          aria-checked={theme === 'dark'}
+          className="theme-switch"
+          title={theme === 'dark' ? 'Ganti ke tampilan terang' : 'Ganti ke tampilan gelap'}
+          onClick={toggleTheme}
+        >
+          <Sun size={16} aria-hidden="true" />
+          <span className="theme-track" aria-hidden="true">
+            <span className="theme-knob" />
+          </span>
+          <Moon size={16} aria-hidden="true" />
+          <span className="sr-only">Mode gelap</span>
+        </button>
       </header>
+
+      <section className="hero">
+        <h1>Ubah dokumen jadi PDF, file tetap di perangkatmu</h1>
+        <p>
+          Pilih file Word, Excel, PowerPoint, atau gambar. Semuanya diproses langsung di browser ini, jadi tidak ada file
+          yang dikirim ke server mana pun.
+        </p>
+        <ul className="trust">
+          <li>
+            <ShieldCheck size={18} aria-hidden="true" />
+            File tidak diunggah
+          </li>
+          <li>
+            <BadgeCheck size={18} aria-hidden="true" />
+            Gratis, tanpa akun
+          </li>
+          <li>
+            <WifiOff size={18} aria-hidden="true" />
+            Bisa offline setelah dibuka sekali
+          </li>
+        </ul>
+      </section>
 
       <section className="card">
         <label className={['dropzone', jobs.length > 0 && 'dropzone--compact', dragging && 'dropzone--active'].filter(Boolean).join(' ')}>
           <span className="dropzone-badge">
             <Upload size={jobs.length > 0 ? 16 : 18} />
           </span>
-          <strong>{jobs.length > 0 ? 'Tambah file lagi' : 'Letakkan file di sini'}</strong>
+          <strong>{jobs.length > 0 ? 'Tambah file lagi' : 'Seret file ke sini'}</strong>
           <span className="muted">
-            {jobs.length > 0 ? 'Seret, klik, atau tempel' : 'atau klik untuk memilih. Menempel gambar juga bisa.'}
+            {jobs.length > 0 ? 'Seret, klik, atau tempel' : 'atau klik di sini untuk memilih file dari perangkatmu.'}
           </span>
+          {jobs.length === 0 && <span className="dropzone-cta">Pilih file</span>}
           <input
             className="sr-only"
             type="file"
@@ -303,7 +390,7 @@ export default function App({ convert = convertFile, preload = preloadOffice }: 
         )}
 
         {jobs.length === 0 ? (
-          <p className="empty">Dokumen, lembar kerja, slide, dan gambar.</p>
+          <p className="empty">Bisa untuk Word, Excel, PowerPoint, OpenDocument, teks, dan gambar (JPG, PNG, WebP).</p>
         ) : (
           <>
             <ul className="jobs">
@@ -321,7 +408,15 @@ export default function App({ convert = convertFile, preload = preloadOffice }: 
                         <span className="mono">{formatBytes(job.file.size)}</span>
                       </div>
                       {job.status !== 'queued' && (
-                        <p className={job.status === 'error' ? 'job-status job-status--error' : 'job-status'}>
+                        <p
+                          className={
+                            job.status === 'error'
+                              ? 'job-status job-status--error'
+                              : job.pdf
+                                ? 'job-status job-status--done'
+                                : 'job-status'
+                          }
+                        >
                           {statusText(job, layout)}
                         </p>
                       )}
@@ -385,32 +480,51 @@ export default function App({ convert = convertFile, preload = preloadOffice }: 
       <section className="guide" aria-labelledby="guide-title">
         <h2 id="guide-title">Cara memakai</h2>
         <ol>
-          <li>Pilih file Word (.docx) atau seret ke kotak di atas. Beberapa file sekaligus juga bisa.</li>
+          <li>Pilih file dari perangkatmu, atau seret ke kotak di atas. Boleh lebih dari satu file.</li>
           <li>
-            Klik <strong>Konversi ke PDF</strong>. Saat pertama kali dipakai, mesin LibreOffice (sekitar 50 MB) diunduh
-            dulu, jadi tunggu sebentar. Setelah itu jauh lebih cepat dan bisa dipakai tanpa internet.
+            Klik <strong>Konversi ke PDF</strong>. Saat pertama kali, ada unduhan sekitar 50 MB untuk menyalakan mesin
+            konversinya, jadi tunggu sebentar. Setelah itu jauh lebih cepat.
           </li>
           <li>
-            Saat muncul tulisan <strong>PDF siap</strong>, klik <strong>Unduh</strong>. File PDF tersimpan di folder
-            Unduhan (Downloads) browser kamu.
-          </li>
-          <li>
-            Punya banyak file? Pakai <strong>Unduh semua (ZIP)</strong>, atau <strong>Gabungkan jadi satu PDF</strong>.
+            Saat muncul <strong>PDF siap</strong>, klik <strong>Unduh</strong>. File tersimpan di folder Unduhan
+            (Downloads) di perangkatmu.
           </li>
         </ol>
-        <p className="guide-note">
-          Untuk hasil yang sama persis dengan Word, biarkan tata letak halaman di <strong>Asli</strong>. Halaman akan
-          memuat ulang satu kali saat kunjungan pertama, itu normal. Font yang tidak ada di perangkat bisa diganti
-          font lain, jadi dokumen yang rumit tetap bisa sedikit bergeser.
-        </p>
+
+        <details>
+          <summary>Apakah file saya aman?</summary>
+          <p>
+            Ya. File dibuka dan diubah oleh program yang berjalan di browser kamu sendiri, bukan di server. Tidak ada
+            file yang dikirim ke mana pun. Kamu bisa membuktikannya: setelah satu konversi berhasil, matikan internet,
+            lalu coba konversi lagi. Hasilnya tetap jadi.
+          </p>
+          <p>
+            Kode situs ini terbuka dan bisa dilihat siapa saja di{' '}
+            <a href="https://github.com/naufalraism/libre-convert" target="_blank" rel="noreferrer">
+              GitHub
+            </a>
+            .
+          </p>
+        </details>
+
+        <details>
+          <summary>Kenapa hasilnya kadang sedikit berbeda dari Word?</summary>
+          <p>
+            Font yang tidak ada di perangkat diganti dengan font lain, sehingga letak teks bisa sedikit bergeser pada
+            dokumen yang rumit. Untuk hasil paling mirip aslinya, biarkan tata letak halaman di <strong>Asli</strong>.
+          </p>
+          <p>Halaman ini memuat ulang satu kali saat pertama dibuka. Itu normal.</p>
+        </details>
       </section>
 
       <footer className="credit">
-        Berdasarkan{' '}
-        <a href="https://github.com/Rhgx/libre-convert" target="_blank" rel="noreferrer">
-          Libre Convert
-        </a>{' '}
-        oleh Rhgx (lisensi MIT). Mesin konversi: LibreOffice melalui ZetaOffice.
+        <p>
+          Berdasarkan{' '}
+          <a href="https://github.com/Rhgx/libre-convert" target="_blank" rel="noreferrer">
+            Libre Convert
+          </a>{' '}
+          oleh Rhgx (lisensi MIT). Mesin konversi: LibreOffice melalui ZetaOffice.
+        </p>
       </footer>
 
       {dragging && (

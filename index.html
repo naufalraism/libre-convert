@@ -8,7 +8,7 @@
       name="description"
       content="Ubah file Word, Excel, PowerPoint, OpenDocument, dan gambar menjadi PDF langsung di browser dengan LibreOffice WASM. File tidak diunggah ke server dan bisa dipakai offline."
     />
-    <meta name="theme-color" content="#111417" />
+    <meta name="theme-color" content="#f6f2ea" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
     <link rel="manifest" href="/manifest.webmanifest" />
@@ -20,6 +20,18 @@
     />
     <!-- Tambahkan canonical, og:url, dan og:image setelah domainmu final. -->
     <meta name="twitter:card" content="summary_large_image" />
+    <script>
+      // Terapkan tema sebelum halaman tampil, supaya tidak berkedip terang lalu gelap.
+      ;(function () {
+        try {
+          var theme = localStorage.getItem('libre-convert:theme')
+          if (theme !== 'light' && theme !== 'dark') {
+            theme = window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+          }
+          document.documentElement.setAttribute('data-theme', theme)
+        } catch (e) {}
+      })()
+    </script>
   </head>
   <body>
     <!-- LibreOffice's Qt layer needs a canvas with this id before it starts. It is never shown. -->

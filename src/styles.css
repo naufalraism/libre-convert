@@ -1,26 +1,59 @@
 @import '@fontsource/ibm-plex-sans/400.css';
 @import '@fontsource/ibm-plex-sans/500.css';
-@import '@fontsource/ibm-plex-mono/400.css';
 
+/* ---------- Tema ---------- */
 :root {
-  --surface: #111417;
-  --surface-elevated: #191d21;
-  --border-subtle: #252a2f;
-  --border-strong: #353b42;
-  --text-strong: #e4e8ec;
-  --text-muted: #8b949c;
-  --text-dim: #636d76;
-  --accent: #58a6ff;
-  --danger: #f47067;
-  --pad: 24px;
+  --bg: #f6f2ea;
+  --surface: #fffdf9;
+  --surface-2: #f2ede2;
+  --line: #e4dccd;
+  --line-strong: #cdc2ad;
+  --ink: #26231d;
+  --ink-2: #4f493d;
+  --ink-3: #6b6354;
+  --accent: #0f6b5c;
+  --accent-hover: #0b574b;
+  --accent-ink: #ffffff;
+  --accent-soft: #dcefe8;
+  --ok: #1b6a41;
+  --danger: #b3382c;
+  --warn-bg: #fff3dc;
+  --warn-line: #ecd3a0;
+  --shadow: 0 1px 2px rgb(60 45 20 / 0.06), 0 8px 24px rgb(60 45 20 / 0.06);
 
-  color-scheme: dark;
-  font-family: 'IBM Plex Sans', sans-serif;
-  line-height: 1.5;
-  color: var(--text-strong);
-  background: var(--surface);
+  --pad: 20px;
+  --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif;
+
+  color-scheme: light;
+  font-family: 'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  font-size: 17px;
+  line-height: 1.55;
+  color: var(--ink);
+  background: var(--bg);
   font-synthesis: none;
   -webkit-font-smoothing: antialiased;
+}
+
+:root[data-theme='dark'] {
+  --bg: #171613;
+  --surface: #211f1b;
+  --surface-2: #2a2823;
+  --line: #36332c;
+  --line-strong: #4b473d;
+  --ink: #f2ede3;
+  --ink-2: #cdc5b5;
+  --ink-3: #a59d8c;
+  --accent: #5fd0b2;
+  --accent-hover: #80e0c7;
+  --accent-ink: #0b2a22;
+  --accent-soft: #1f3a33;
+  --ok: #86dcab;
+  --danger: #ff9d90;
+  --warn-bg: #332b17;
+  --warn-line: #5b4a22;
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px rgb(0 0 0 / 0.25);
+
+  color-scheme: dark;
 }
 
 * {
@@ -30,6 +63,8 @@
 body {
   min-width: 320px;
   margin: 0;
+  background: var(--bg);
+  transition: background-color 200ms ease;
 }
 
 button,
@@ -42,105 +77,239 @@ button {
   cursor: pointer;
 }
 
+a {
+  color: inherit;
+}
+
 :focus-visible {
-  outline: 2px solid var(--accent);
+  outline: 3px solid var(--accent);
   outline-offset: 2px;
 }
 
 .shell {
-  width: min(680px, 100% - 28px);
+  width: min(720px, 100% - 32px);
   margin: 0 auto;
-  padding: 40px 0;
+  padding: 20px 0 48px;
 }
 
-.intro {
-  margin-bottom: 16px;
+/* ---------- Bagian atas ---------- */
+.topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 28px;
 }
 
-.intro h1 {
-  margin: 0;
-  font-size: 1rem;
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.brand-mark {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.brand-name {
+  font-family: var(--serif);
+  font-size: 1.15rem;
   font-weight: 500;
 }
 
-.intro p {
-  margin: 2px 0 0;
-  font-size: 0.8125rem;
-  color: var(--text-muted);
+.theme-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 40px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--ink-2);
+  transition: border-color 150ms ease;
 }
 
+.theme-switch:hover {
+  border-color: var(--accent);
+}
+
+.theme-track {
+  position: relative;
+  display: block;
+  width: 42px;
+  height: 24px;
+  border-radius: 999px;
+  background: var(--line-strong);
+  transition: background-color 200ms ease;
+}
+
+.theme-knob {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #fff;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 0.3);
+  transition: transform 200ms ease;
+}
+
+.theme-switch[aria-checked='true'] .theme-track {
+  background: var(--accent);
+}
+
+.theme-switch[aria-checked='true'] .theme-knob {
+  transform: translateX(18px);
+}
+
+.hero h1 {
+  margin: 0;
+  font-family: var(--serif);
+  font-size: clamp(1.7rem, 5.5vw, 2.35rem);
+  font-weight: 500;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+.hero p {
+  margin: 12px 0 0;
+  font-size: 1.05rem;
+  color: var(--ink-2);
+}
+
+.trust {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 18px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.trust li {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 14px 7px 11px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 0.9rem;
+  color: var(--ink-2);
+}
+
+.trust svg {
+  flex: none;
+  color: var(--accent);
+}
+
+/* ---------- Kartu utama ---------- */
 .card {
-  border: 1px solid var(--border-subtle);
-  border-radius: 12px;
-  background: var(--surface-elevated);
-  padding-top: var(--pad);
+  margin-top: 24px;
+  padding: var(--pad);
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--surface);
+  box-shadow: var(--shadow);
 }
 
 .dropzone {
   display: grid;
   justify-items: center;
   gap: 6px;
-  margin: 0 var(--pad);
-  padding: 32px var(--pad);
-  border: 1px dashed var(--border-strong);
-  border-radius: 6px;
-  background: var(--surface);
+  padding: 36px 20px;
+  border: 2px dashed var(--line-strong);
+  border-radius: 16px;
+  background: var(--surface-2);
   text-align: center;
   cursor: pointer;
-  transition: border-color 150ms ease;
+  transition: border-color 150ms ease, background-color 150ms ease;
 }
 
 .dropzone:hover,
 .dropzone:focus-within,
 .dropzone--active {
   border-color: var(--accent);
+  background: var(--accent-soft);
 }
 
 .dropzone strong {
-  font-size: 0.9375rem;
+  font-family: var(--serif);
+  font-size: 1.3rem;
   font-weight: 500;
+}
+
+.dropzone .muted {
+  max-width: 34ch;
+  font-size: 0.95rem;
+}
+
+.dropzone-badge {
+  display: grid;
+  place-items: center;
+  width: 60px;
+  height: 60px;
+  margin-bottom: 4px;
+  border-radius: 50%;
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.dropzone:hover .dropzone-badge,
+.dropzone--active .dropzone-badge {
+  background: var(--surface);
+}
+
+.dropzone-cta {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 11px 22px;
+  border-radius: 12px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 500;
+}
+
+.dropzone:hover .dropzone-cta {
+  background: var(--accent-hover);
 }
 
 .dropzone--compact {
   grid-auto-flow: column;
   justify-content: start;
   align-items: center;
-  gap: 12px;
-  padding: 10px 12px;
+  gap: 14px;
+  padding: 12px 16px;
+  border-width: 1.5px;
   text-align: left;
 }
 
 .dropzone--compact .dropzone-badge {
-  width: 32px;
-  height: 32px;
+  width: 40px;
+  height: 40px;
   margin: 0;
 }
 
 .dropzone--compact strong {
-  font-size: 0.875rem;
+  font-family: inherit;
+  font-size: 1rem;
 }
 
-.dropzone .muted {
-  font-size: 0.8125rem;
+.dropzone--compact .muted {
+  max-width: none;
+  font-size: 0.9rem;
 }
 
-.dropzone-badge,
-.job-icon {
-  display: grid;
-  place-items: center;
-  flex: none;
-  width: 34px;
-  height: 34px;
-  border: 1px solid var(--border-subtle);
-  border-radius: 6px;
-  color: var(--accent);
-}
-
-.dropzone-badge {
-  width: 40px;
-  height: 40px;
-  margin-bottom: 4px;
-  background: var(--surface-elevated);
+.muted {
+  color: var(--ink-3);
 }
 
 .toolbar {
@@ -148,39 +317,39 @@ button {
   grid-template-columns: auto 1fr auto;
   grid-template-rows: auto auto;
   align-items: end;
-  gap: 0 16px;
-  padding: 18px var(--pad);
+  gap: 0 18px;
+  padding: 20px 0 6px;
 }
 
 .field {
   display: grid;
   grid-row: 1 / span 2;
-  gap: 4px;
+  gap: 6px;
 }
 
 .toolbar .button--primary {
   grid-row: 1 / span 2;
 }
 
-.label,
-.mono {
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.72rem;
-  color: var(--text-dim);
+.label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--ink-2);
 }
 
-.label {
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
+.mono {
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--ink-3);
 }
 
 .field select {
-  min-height: 38px;
-  padding: 0 10px;
-  font-size: 0.875rem;
-  border: 1px solid var(--border-strong);
-  border-radius: 6px;
+  min-height: 48px;
+  padding: 0 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
   background: var(--surface);
+  font-size: 1rem;
 }
 
 .field select:disabled {
@@ -188,60 +357,64 @@ button {
 }
 
 .hint {
-  /* Sits on the select's row (the label is above it) so both stay centred on each other. */
   grid-row: 1 / span 2;
   align-self: end;
   display: flex;
   align-items: center;
-  min-height: 38px;
+  min-height: 48px;
   margin: 0;
-  font-size: 0.75rem;
-  color: var(--text-dim);
-}
-
-.muted {
-  color: var(--text-muted);
+  font-size: 0.85rem;
+  line-height: 1.4;
+  color: var(--ink-3);
 }
 
 .callout {
   display: flex;
   gap: 10px;
-  margin: 0;
-  padding: 0 var(--pad) 16px;
-  font-size: 0.8125rem;
-  color: var(--text-muted);
+  margin: 14px 0 0;
+  padding: 12px 14px;
+  border: 1px solid var(--warn-line);
+  border-radius: 12px;
+  background: var(--warn-bg);
+  font-size: 0.95rem;
 }
 
 .callout svg {
   flex: none;
   margin-top: 3px;
-  color: var(--danger);
 }
 
 .empty {
-  margin: 0;
-  padding: 14px var(--pad) var(--pad);
+  margin: 16px 0 0;
   text-align: center;
-  font-size: 0.875rem;
-  color: var(--text-muted);
+  font-size: 0.9rem;
+  color: var(--ink-3);
 }
 
+/* ---------- Daftar file ---------- */
 .jobs {
-  margin: 0;
-  padding: 0 var(--pad);
+  margin: 14px 0 0;
+  padding: 0;
   list-style: none;
 }
 
 .job {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 14px 0;
-  border-top: 1px solid var(--border-subtle);
+  gap: 14px;
+  padding: 16px 0;
+  border-top: 1px solid var(--line);
 }
 
 .job-icon {
-  background: var(--surface);
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 46px;
+  height: 46px;
+  border-radius: 12px;
+  background: var(--accent-soft);
+  color: var(--accent);
 }
 
 .job-copy {
@@ -258,7 +431,6 @@ button {
 .job-name strong {
   min-width: 0;
   overflow: hidden;
-  font-size: 0.875rem;
   font-weight: 500;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -269,10 +441,19 @@ button {
 }
 
 .job-status {
-  margin: 0;
-  font-size: 0.8125rem;
-  color: var(--text-muted);
+  margin: 2px 0 0;
+  font-size: 0.92rem;
+  color: var(--ink-2);
   overflow-wrap: anywhere;
+}
+
+.job-status--done {
+  color: var(--ok);
+  font-weight: 500;
+}
+
+.job-status--done::before {
+  content: '\2713\00a0';
 }
 
 .job-status--error {
@@ -282,11 +463,11 @@ button {
 .bar {
   position: relative;
   display: block;
-  height: 3px;
-  margin-top: 8px;
+  height: 5px;
+  margin-top: 10px;
   overflow: hidden;
-  border-radius: 2px;
-  background: var(--border-subtle);
+  border-radius: 3px;
+  background: var(--line);
 }
 
 .bar::after {
@@ -310,9 +491,9 @@ button {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
-  gap: 10px 14px;
-  padding: 14px var(--pad);
-  border-top: 1px solid var(--border-subtle);
+  gap: 10px 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
 }
 
 .footer-actions {
@@ -320,85 +501,172 @@ button {
   margin-left: auto;
 }
 
-/* Clear sits with the count, away from the download actions, and looks like what it is: a minor action. */
 .link {
   padding: 0;
   border: 0;
   background: none;
-  font-family: 'IBM Plex Mono', monospace;
-  font-size: 0.72rem;
-  color: var(--text-dim);
+  font-size: 0.9rem;
+  color: var(--ink-3);
   text-decoration: underline;
   text-underline-offset: 3px;
 }
 
 .link:hover {
-  color: var(--text-strong);
+  color: var(--ink);
 }
 
+/* ---------- Tombol ---------- */
 .button,
 .icon-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  min-height: 34px;
-  padding: 0 10px;
-  border: 1px solid var(--border-strong);
-  border-radius: 6px;
+  gap: 8px;
+  min-height: 42px;
+  padding: 0 16px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
   background: var(--surface);
-  font-size: 0.8125rem;
+  font-size: 0.95rem;
+  font-weight: 500;
   white-space: nowrap;
-  transition: border-color 150ms ease, opacity 150ms ease;
+  transition: border-color 150ms ease, color 150ms ease, background-color 150ms ease;
 }
 
 .button:hover,
 .icon-button:hover {
   border-color: var(--accent);
+  color: var(--accent);
 }
 
 .button:disabled {
-  opacity: 0.4;
+  opacity: 0.5;
   cursor: not-allowed;
 }
 
 .button--primary {
-  min-width: 190px;
-  min-height: 38px;
-  padding: 0 14px;
+  min-width: 200px;
+  min-height: 50px;
+  padding: 0 22px;
   border-color: var(--accent);
   background: var(--accent);
-  color: #0d1117;
-  font-size: 0.875rem;
-  font-weight: 500;
+  color: var(--accent-ink);
+  font-size: 1.05rem;
 }
 
 .button--primary:hover:not(:disabled) {
-  opacity: 0.9;
+  border-color: var(--accent-hover);
+  background: var(--accent-hover);
+  color: var(--accent-ink);
 }
 
 .icon-button {
-  width: 34px;
+  width: 42px;
   padding: 0;
-  color: var(--text-muted);
+  color: var(--ink-3);
 }
 
 .spin {
   animation: spin 1s linear infinite;
 }
 
+/* ---------- Panduan ---------- */
+.guide {
+  margin-top: 24px;
+  padding: 24px var(--pad) 8px;
+  border: 1px solid var(--line);
+  border-radius: 20px;
+  background: var(--surface);
+}
+
+.guide h2 {
+  margin: 0 0 16px;
+  font-family: var(--serif);
+  font-size: 1.35rem;
+  font-weight: 500;
+}
+
+.guide ol {
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+  counter-reset: step;
+}
+
+.guide ol li {
+  position: relative;
+  margin: 0 0 16px;
+  padding-left: 46px;
+  color: var(--ink-2);
+  counter-increment: step;
+}
+
+.guide ol li::before {
+  content: counter(step);
+  position: absolute;
+  top: 0;
+  left: 0;
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-weight: 500;
+}
+
+.guide strong {
+  font-weight: 500;
+  color: var(--ink);
+}
+
+.guide details {
+  border-top: 1px solid var(--line);
+}
+
+.guide summary {
+  padding: 14px 0;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.guide details p {
+  margin: 0 0 14px;
+  font-size: 0.95rem;
+  color: var(--ink-2);
+}
+
+.guide details a {
+  color: var(--accent);
+}
+
+.credit {
+  margin-top: 20px;
+  font-size: 0.85rem;
+  text-align: center;
+  color: var(--ink-3);
+}
+
+.credit p {
+  margin: 0;
+}
+
+/* ---------- Lain-lain ---------- */
 .drop-overlay {
   position: fixed;
   inset: 12px;
   display: grid;
   place-items: center;
-  border: 1px dashed var(--accent);
-  border-radius: 12px;
-  background: rgb(17 20 23 / 0.85);
-  font-weight: 500;
+  border: 2px dashed var(--accent);
+  border-radius: 20px;
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  font-family: var(--serif);
+  font-size: 1.4rem;
   pointer-events: none;
 }
 
+/* Dibutuhkan LibreOffice (Qt): kanvas harus ada, tapi tidak pernah tampil. */
 .qt-canvas {
   position: fixed;
   top: -10000px;
@@ -436,49 +704,37 @@ button {
   .bar::after {
     animation-duration: 3s;
   }
+
+  .theme-knob,
+  .theme-track,
+  body {
+    transition: none;
+  }
 }
 
 @media (max-width: 600px) {
   :root {
-    --pad: 14px;
+    --pad: 16px;
+    font-size: 16px;
   }
 
   .shell {
-    width: calc(100% - 16px);
-    padding: 20px 0;
-  }
-
-  .card {
-    border-radius: 10px;
+    width: calc(100% - 24px);
+    padding-top: 12px;
   }
 
   .dropzone:not(.dropzone--compact) {
-    padding: 24px var(--pad);
+    padding: 28px 16px;
   }
 
   .dropzone--compact .muted {
     display: none;
   }
 
-  /* Icon-only row buttons leave room for the file name; the label stays for screen readers. */
-  .job-actions .button {
-    width: 34px;
-    padding: 0;
-  }
-
-  .job-actions .button-label {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip-path: inset(50%);
-    white-space: nowrap;
-  }
-
   .toolbar {
     grid-template-columns: 1fr;
     grid-template-rows: none;
-    gap: 8px;
+    gap: 10px;
   }
 
   .field,
@@ -495,54 +751,26 @@ button {
     width: 100%;
   }
 
-  .job-icon {
-    display: none;
+  /* Tombol tetap berlabel di HP; baris pindah ke bawah nama file. */
+  .job {
+    flex-wrap: wrap;
   }
-}
 
-.guide {
-  margin-top: 16px;
-  padding: var(--pad);
-  border: 1px solid var(--border-subtle);
-  border-radius: 12px;
-  background: var(--surface-elevated);
-}
+  .job-copy {
+    flex: 1 1 calc(100% - 64px);
+  }
 
-.guide h2 {
-  margin: 0 0 10px;
-  font-size: 0.9375rem;
-  font-weight: 500;
-}
+  .job-actions {
+    width: 100%;
+    padding-left: 60px;
+  }
 
-.guide ol {
-  margin: 0;
-  padding-left: 1.3em;
-  font-size: 0.875rem;
-  color: var(--text-muted);
-}
+  .job-actions .icon-button {
+    margin-left: auto;
+  }
 
-.guide li {
-  margin: 6px 0;
-}
-
-.guide strong {
-  font-weight: 500;
-  color: var(--text-strong);
-}
-
-.guide-note {
-  margin: 12px 0 0;
-  font-size: 0.8125rem;
-  color: var(--text-dim);
-}
-
-.credit {
-  margin-top: 16px;
-  font-size: 0.75rem;
-  text-align: center;
-  color: var(--text-dim);
-}
-
-.credit a {
-  color: var(--text-muted);
+  .footer-actions {
+    width: 100%;
+    margin-left: 0;
+  }
 }

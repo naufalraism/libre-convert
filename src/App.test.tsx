@@ -22,7 +22,7 @@ describe('App', () => {
     const { user, input } = setup()
     await user.upload(input, [file('notes.docx'), file('archive.zip')])
 
-    expect(screen.getByText('Skipped unsupported files: archive.zip')).toBeInTheDocument()
+    expect(screen.getByText('File tidak didukung dilewati: archive.zip')).toBeInTheDocument()
     expect(screen.getByText('notes.docx')).toBeInTheDocument()
     expect(screen.queryByText('archive.zip')).not.toBeInTheDocument()
   })
@@ -39,98 +39,98 @@ describe('App', () => {
   it('converts every queued file with the chosen layout', async () => {
     const { user, input, convert } = setup()
     await user.upload(input, [file('a.docx'), file('b.png')])
-    await user.selectOptions(screen.getByRole('combobox', { name: /page layout/i }), 'landscape')
-    await user.click(screen.getByRole('button', { name: 'Convert 2 files' }))
+    await user.selectOptions(screen.getByRole('combobox', { name: /tata letak halaman/i }), 'landscape')
+    await user.click(screen.getByRole('button', { name: 'Konversi 2 file' }))
 
-    expect(await screen.findAllByRole('button', { name: 'Download' })).toHaveLength(2)
+    expect(await screen.findAllByRole('button', { name: 'Unduh' })).toHaveLength(2)
     expect(convert).toHaveBeenNthCalledWith(1, expect.any(File), 'writer', 'landscape', expect.any(Function))
     expect(convert).toHaveBeenNthCalledWith(2, expect.any(File), 'image', 'landscape', expect.any(Function))
-    expect(screen.getByText('2 of 2 converted')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /download all/i })).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /merge into one pdf/i })).toBeInTheDocument()
+    expect(screen.getByText('2 dari 2 selesai')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /unduh semua/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: /gabungkan jadi satu pdf/i })).toBeInTheDocument()
   })
 
   it('shows the failure and converts again on retry', async () => {
     const convert = vi.fn<typeof convertFile>().mockRejectedValueOnce(new Error('File is damaged')).mockResolvedValue(pdf())
     const { user, input } = setup(convert)
     await user.upload(input, file('broken.xlsx'))
-    await user.click(screen.getByRole('button', { name: 'Convert to PDF' }))
+    await user.click(screen.getByRole('button', { name: 'Konversi ke PDF' }))
 
     expect(await screen.findByText('File is damaged')).toBeInTheDocument()
-    expect(screen.getByText('0 of 1 converted, 1 failed')).toBeInTheDocument()
+    expect(screen.getByText('0 dari 1 selesai, 1 gagal')).toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'Retry' }))
-    expect(await screen.findByRole('button', { name: 'Download' })).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Coba lagi' }))
+    expect(await screen.findByRole('button', { name: 'Unduh' })).toBeInTheDocument()
     expect(convert).toHaveBeenCalledTimes(2)
   })
 
   it('shows engine progress while a document converts', async () => {
     let finish = () => {}
     const convert = vi.fn<typeof convertFile>(async (_file, _kind, _layout, onNote) => {
-      onNote('Downloading LibreOffice')
+      onNote('Mengunduh LibreOffice')
       await new Promise<void>((resolve) => (finish = resolve))
       return pdf()
     })
     const { user, input } = setup(convert)
     await user.upload(input, file('slides.odp'))
-    await user.click(screen.getByRole('button', { name: 'Convert to PDF' }))
+    await user.click(screen.getByRole('button', { name: 'Konversi ke PDF' }))
 
-    expect(await screen.findByText('Downloading LibreOffice')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Converting 1 of 1' })).toBeDisabled()
-    expect(screen.getByRole('combobox', { name: /page layout/i })).toBeDisabled()
+    expect(await screen.findByText('Mengunduh LibreOffice')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Mengonversi 1 dari 1' })).toBeDisabled()
+    expect(screen.getByRole('combobox', { name: /tata letak halaman/i })).toBeDisabled()
     finish()
-    expect(await screen.findByText(/PDF ready/)).toBeInTheDocument()
+    expect(await screen.findByText('PDF siap, 8 B')).toBeInTheDocument()
   })
 
   it('converts everything again with a new layout once done', async () => {
     const { user, input, convert } = setup()
     await user.upload(input, file('a.docx'))
-    await user.click(screen.getByRole('button', { name: 'Convert to PDF' }))
-    await screen.findByRole('button', { name: 'Download' })
+    await user.click(screen.getByRole('button', { name: 'Konversi ke PDF' }))
+    await screen.findByRole('button', { name: 'Unduh' })
 
-    await user.selectOptions(screen.getByRole('combobox', { name: /page layout/i }), 'portrait')
-    await user.click(screen.getByRole('button', { name: 'Convert all again' }))
-    await screen.findByRole('button', { name: 'Download' })
+    await user.selectOptions(screen.getByRole('combobox', { name: /tata letak halaman/i }), 'portrait')
+    await user.click(screen.getByRole('button', { name: 'Konversi ulang semua' }))
+    await screen.findByRole('button', { name: 'Unduh' })
     expect(convert).toHaveBeenLastCalledWith(expect.any(File), 'writer', 'portrait', expect.any(Function))
   })
 
   it('remembers the page layout', async () => {
     const first = setup()
     await first.user.upload(first.input, file('a.docx'))
-    await first.user.selectOptions(screen.getByRole('combobox', { name: /page layout/i }), 'landscape')
+    await first.user.selectOptions(screen.getByRole('combobox', { name: /tata letak halaman/i }), 'landscape')
     cleanup()
 
     const second = setup()
     await second.user.upload(second.input, file('b.docx'))
-    expect(screen.getByRole('combobox', { name: /page layout/i })).toHaveValue('landscape')
+    expect(screen.getByRole('combobox', { name: /tata letak halaman/i })).toHaveValue('landscape')
   })
 
   it('tags outputs made with a layout other than the selected one', async () => {
     const { user, input } = setup()
     await user.upload(input, file('a.docx'))
-    await user.click(screen.getByRole('button', { name: 'Convert to PDF' }))
-    expect(await screen.findByText('PDF ready, 8 B')).toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Konversi ke PDF' }))
+    expect(await screen.findByText('PDF siap, 8 B')).toBeInTheDocument()
 
-    await user.selectOptions(screen.getByRole('combobox', { name: /page layout/i }), 'landscape')
-    expect(screen.getByText('PDF ready, 8 B (original)')).toBeInTheDocument()
+    await user.selectOptions(screen.getByRole('combobox', { name: /tata letak halaman/i }), 'landscape')
+    expect(screen.getByText('PDF siap, 8 B (asli)')).toBeInTheDocument()
   })
 
   it('converts with Ctrl+Enter', async () => {
     const { user, input, convert } = setup()
     await user.upload(input, file('a.odt'))
     await user.keyboard('{Control>}{Enter}{/Control}')
-    await screen.findByRole('button', { name: 'Download' })
+    await screen.findByRole('button', { name: 'Unduh' })
     expect(convert).toHaveBeenCalledOnce()
   })
 
   it('removes and clears files', async () => {
     const { user, input } = setup()
     await user.upload(input, [file('a.docx'), file('b.docx')])
-    await user.click(screen.getByRole('button', { name: 'Remove a.docx' }))
+    await user.click(screen.getByRole('button', { name: 'Hapus a.docx' }))
     expect(screen.queryByText('a.docx')).not.toBeInTheDocument()
 
-    await user.click(screen.getByRole('button', { name: 'Clear' }))
-    expect(screen.queryByRole('listitem')).not.toBeInTheDocument()
+    await user.click(screen.getByRole('button', { name: 'Kosongkan' }))
+    expect(document.querySelector('ul.jobs')).toBeNull()
     expect(screen.queryByRole('combobox')).not.toBeInTheDocument()
   })
 })

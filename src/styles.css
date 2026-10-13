@@ -20,6 +20,7 @@
   --warn-bg: #fff3dc;
   --warn-line: #ecd3a0;
   --shadow: 0 1px 2px rgb(60 45 20 / 0.06), 0 8px 24px rgb(60 45 20 / 0.06);
+  --scrim: rgb(246 242 234 / 0.4);
 
   --pad: 20px;
   --serif: 'Iowan Old Style', 'Palatino Linotype', Palatino, Georgia, 'Times New Roman', serif;
@@ -52,6 +53,7 @@
   --warn-bg: #332b17;
   --warn-line: #5b4a22;
   --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 8px 24px rgb(0 0 0 / 0.25);
+  --scrim: rgb(23 22 19 / 0.55);
 
   color-scheme: dark;
 }
@@ -63,8 +65,19 @@
 body {
   min-width: 320px;
   margin: 0;
-  background: var(--bg);
-  transition: background-color 200ms ease;
+}
+
+/* Gambar latar: tetap di tempat saat halaman digulir. Memakai elemen tetap (bukan background-attachment)
+   karena di HP, background-attachment: fixed sering diabaikan atau patah-patah. */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background-color: var(--bg);
+  background-image: linear-gradient(var(--scrim), var(--scrim)), url('./assets/background.jpg');
+  background-size: cover;
+  background-position: center;
 }
 
 button,
@@ -86,10 +99,15 @@ a {
   outline-offset: 2px;
 }
 
+/* Kolom utama berlatar penuh, jadi teks tidak pernah menumpuk di atas gambar. Gambar hanya terlihat di kiri-kanan. */
 .shell {
-  width: min(720px, 100% - 32px);
-  margin: 0 auto;
-  padding: 20px 0 48px;
+  width: min(800px, 100% - 32px);
+  margin: 28px auto;
+  padding: 28px 32px 48px;
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  background: var(--bg);
+  box-shadow: var(--shadow);
 }
 
 /* ---------- Bagian atas ---------- */
@@ -719,8 +737,12 @@ a {
   }
 
   .shell {
-    width: calc(100% - 24px);
-    padding-top: 12px;
+    width: 100%;
+    margin: 0;
+    padding: 16px 14px 40px;
+    border: 0;
+    border-radius: 0;
+    box-shadow: none;
   }
 
   .dropzone:not(.dropzone--compact) {
